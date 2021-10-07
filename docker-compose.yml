@@ -1,0 +1,36 @@
+version: '3.7'
+
+services:
+  db:
+    image: mysql:5.7
+    container_name: danauf_reisen_db
+    volumes:
+      - ./database/data:/var/lib/mysql
+      - ./database/initdb.d:/docker-entrypoint-initdb.d
+
+    restart: always
+    ports:
+      - 3307:3306
+    environment:
+      MYSQL_ROOT_PASSWORD: "${WP_MYSQL_ROOT_PASSWORD}"
+      MYSQL_DATABASE: "${WP_MYSQL_DATABASE}"
+      MYSQL_USER: "${WP_MYSQL_USER}" 
+      MYSQL_PASSWORD: "${WP_MYSQL_PASSWORD}"
+
+  danauf_reisen_wp:
+    depends_on:
+      - db 
+    image: wordpress:latest 
+    container_name: danauf_reisen_wordpress 
+    ports:
+      - "1234:80"
+    restart: always
+    environment:
+      WORDPRESS_DB_NAME: "${WP_MYSQL_DATABASE}"
+      WORDPRESS_DB_HOST: mysql
+      WORDPRESS_DB_USER: "${WP_MYSQL_USER}"
+      WORDPRESS_DB_PASSWORD: "${WP_MYSQL_PASSWORD}"
+    links:
+      - db:mysql
+    volumes:
+       - ./src:/var/www/html
